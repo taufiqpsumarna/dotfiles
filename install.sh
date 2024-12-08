@@ -19,6 +19,7 @@ dnsutils
 echo "Fixing folder permissions"
 sudo chown -R $(whoami):$(whoami) /home/$(whoami)
 touch /home/$(whoami)/personalize && chmod +x /home/$(whoami)/personalize
+chmod +x /home/$(whoami)/.config/coderv2/dotfiles/install.sh
 
 
 # Install python packages
