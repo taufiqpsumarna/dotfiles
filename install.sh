@@ -17,9 +17,8 @@ sudo apt install -y \
   wget \
   vim \
   nano \
-  dnsutils \
-  python3-pip
-
+  dnsutils
+  
 # --- Fix Folder Permissions ---
 echo "Fixing folder permissions"
 USER_HOME="/home/$(whoami)"
@@ -31,8 +30,5 @@ chmod +x "$USER_HOME/personalize"
 mkdir -p "$USER_HOME/.config/coderv2/dotfiles"
 touch "$USER_HOME/.config/coderv2/dotfiles/install.sh"
 chmod +x "$USER_HOME/.config/coderv2/dotfiles/install.sh"
-
-# --- Python Packages ---
-pip3 install --upgrade awscli
 
 echo "Dotfiles setup completed."
