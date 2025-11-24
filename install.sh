@@ -1,26 +1,38 @@
-#!/bin/sh
+#!/bin/bash
+# DevOps Engineer Dotfiles Initialization Script
+# This script installs essential system packages, CLI tools, and DevOps utilities.
+# Designed for container or workstation bootstrap.
+
+set -euo pipefail
+
 PATH="/tmp/code-server/bin:$PATH"
 
-set -e
-curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' sudo -E bash
-echo "Install server packages"
-# Run programs at workspace startup
-apt update && apt upgrade -y \
-apt install -y \
-infisical \
-git \
-curl \
-wget \
-vim \
-nano \
-dnsutils
+# --- Install System Packages ---
+echo "Installing server packages"
+sudo apt update -y && sudo apt upgrade -y
+sudo apt install -y \
+  btop \
+  git \
+  curl \
+  wget \
+  vim \
+  nano \
+  dnsutils \
+  python3-pip
 
-# Fixing folder permissions inside container
+# --- Fix Folder Permissions ---
 echo "Fixing folder permissions"
-sudo chown -R $(whoami):$(whoami) /home/$(whoami)
-touch /home/$(whoami)/personalize && chmod +x /home/$(whoami)/personalize
-chmod +x /home/$(whoami)/.config/coderv2/dotfiles/install.sh
+USER_HOME="/home/$(whoami)"
+sudo chown -R $(whoami):$(whoami) "$USER_HOME"
 
+touch "$USER_HOME/personalize"
+chmod +x "$USER_HOME/personalize"
 
-# Install python packages
-pip install awscli 
+mkdir -p "$USER_HOME/.config/coderv2/dotfiles"
+touch "$USER_HOME/.config/coderv2/dotfiles/install.sh"
+chmod +x "$USER_HOME/.config/coderv2/dotfiles/install.sh"
+
+# --- Python Packages ---
+pip3 install --upgrade awscli
+
+echo "Dotfiles setup completed."
