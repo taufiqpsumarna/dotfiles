@@ -3,10 +3,6 @@
 # This script installs essential system packages, CLI tools, and DevOps utilities.
 # Designed for container or workstation bootstrap.
 
-set -euo pipefail
-
-PATH="/tmp/code-server/bin:$PATH"
-
 # --- Install System Packages ---
 echo "Updating package lists and upgrading system packages..."
 sudo apt-get update -y
@@ -23,18 +19,6 @@ sudo apt-get install -y \
   zip \
   unzip \
   tar
-
-# --- Fix Folder Permissions ---
-echo "Fixing folder permissions"
-USER_HOME="/home/$(whoami)"
-sudo chown -R $(whoami):$(whoami) "$USER_HOME"
-
-touch "$USER_HOME/personalize"
-chmod +x "$USER_HOME/personalize"
-
-mkdir -p "$USER_HOME/.config/coderv2/dotfiles"
-touch "$USER_HOME/.config/coderv2/dotfiles/install.sh"
-chmod +x "$USER_HOME/.config/coderv2/dotfiles/install.sh"
 
 # --- Install AWS CLI v2 ---
 echo "Installing AWS CLI v2"
