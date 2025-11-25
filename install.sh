@@ -8,10 +8,12 @@ set -euo pipefail
 PATH="/tmp/code-server/bin:$PATH"
 
 # --- Install System Packages ---
-echo "Installing server packages"
-sudo apt update -y && sudo apt upgrade -y
-sudo apt install -y \
+echo "Updating package lists and upgrading system packages..."
+sudo apt-get update -y
+sudo apt-get dist-upgrade -y
 
+echo "Installing essential system packages..."
+sudo apt-get install -y \
   git \
   curl \
   wget \
