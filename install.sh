@@ -50,10 +50,8 @@ rm kubectl
 
 # --- Install kubectx & kubens ---
 echo "Installing kubectx & kubens"
-sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx || true
-sudo ln -sf /opt/kubectx/kubectx /usr/local/bin/kubectx
-sudo git clone https://github.com/ahmetb/kubens /opt/kubens || true
-sudo ln -sf /opt/kubens/kubens /usr/local/bin/kubens
+sudo apt install kubectx
+sudo apt install kubens
 
 # --- Install k9s ---
 echo "Installing k9s"
