@@ -48,10 +48,9 @@ curl -sLO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable
 sudo install -m 0755 kubectl /usr/local/bin/kubectl
 rm kubectl
 
-# --- Install kubectx & kubens ---
-echo "Installing kubectx & kubens"
+# --- Install kubectx ---
+echo "Installing kubectx"
 sudo apt install kubectx
-sudo apt install kubens
 
 # --- Install k9s ---
 echo "Installing k9s"
