@@ -20,6 +20,11 @@ sudo apt-get install -y \
   unzip \
   tar
 
+# --- Install Dive ---
+DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+sudo curl -fOL "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb"
+sudo apt install ./dive_${DIVE_VERSION}_linux_amd64.deb
+
 # --- Install AWS CLI v2 ---
 echo "Installing AWS CLI v2"
 curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
