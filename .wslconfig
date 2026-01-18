@@ -1,0 +1,30 @@
+[wsl2]
+# HARDWARE LIMITS
+# DevOps tools (K8s/Docker) are RAM hungry. 
+# Recommendation: Set to 75-80% of your total Host RAM.
+memory=8GB 
+# Let WSL use all cores for fast builds, or limit it if you multitask heavily.
+processors=4
+# Swap is vital for stability when RAM maxes out during heavy builds.
+swap=2GB
+
+# NETWORKING (Requires Win 11)
+# "mirrored" allows you to access WSL apps via 'localhost' easily 
+# and supports IPv6/VPNs much better.
+# nat / mirrored
+networkingMode=nat
+#dnsTunneling=true
+#firewall=true
+#autoProxy=true
+
+[experimental]
+# DISK MANAGEMENT
+# Automatically releases unused disk space back to Windows (crucial for Docker layers).
+sparseVhd=true
+
+# MEMORY MANAGEMENT
+# "gradual" releases cached Linux RAM back to Windows when not in use.
+autoMemoryReclaim=gradual
+
+# DNS
+bestEffortDnsParsing=true
