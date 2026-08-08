@@ -8,7 +8,7 @@ Designed for **Ubuntu / WSL2** with oh-my-zsh + Powerlevel10k.
 ## Quick Start
 
 ```bash
-git clone https://github.com/yuurei/dotfiles.git ~/dotfiles
+git clone https://github.com/taufiqpsumarna/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 bash bootstrap.sh
 source ~/.zshrc
