@@ -182,6 +182,11 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
   export WINHOME="/mnt/c/Users/$(cmd.exe /c echo %USERNAME% 2>/dev/null | tr -d '\r\n')"
   alias cdwin="cd '$WINHOME'"
 
+  # Zed editor (Windows install, accessible from WSL2)
+  export PATH="$PATH:/mnt/c/Users/ASUS/AppData/Local/Programs/Zed/bin"
+  alias ze="zed ."       # open current dir in Zed
+  alias zed.="zed ."
+
   # Fix interop for running Windows executables
   export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
 fi
