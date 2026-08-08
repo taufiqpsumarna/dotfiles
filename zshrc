@@ -183,7 +183,7 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
   alias cdwin="cd '$WINHOME'"
 
   # Zed editor (Windows install, accessible from WSL2)
-  export PATH="$PATH:/mnt/c/Users/ASUS/AppData/Local/Programs/Zed/bin"
+  export PATH="$PATH:$WINHOME/AppData/Local/Programs/Zed/bin"
   alias ze="zed ."       # open current dir in Zed
   alias zed.="zed ."
 
