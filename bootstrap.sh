@@ -51,6 +51,7 @@ APT_PACKAGES=(
   zsh
   vim
   build-essential
+  htop             # interactive process viewer
   direnv           # per-directory env loading
   ripgrep          # rg: fast grep
   fd-find          # fd: fast find

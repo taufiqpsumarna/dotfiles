@@ -504,6 +504,52 @@ alias pingg="ping -c 4 8.8.8.8"
 alias reload="source ~/.zshrc && echo 'Config reloaded'"
 alias zshrc="$EDITOR ~/.zshrc"
 
+# Tool launchers
+alias hd="herdr"
+alias jc="jcode"
+alias top="htop"   # prefer htop over plain top
+
+# ==============================================================================
+# RTK — CLI proxy that reduces LLM token consumption 60-90%
+# Docs: https://github.com/rtk-ai/rtk
+# Full mode: --ultra-compact (Level 2 optimizations, ASCII icons, inline format)
+# ==============================================================================
+if command -v rtk &>/dev/null; then
+  # Core rtk aliases in ultra-compact (full) mode
+  alias rgit="rtk --ultra-compact git"
+  alias rgh="rtk --ultra-compact gh"
+  alias raws="rtk --ultra-compact aws"
+  alias rdocker="rtk --ultra-compact docker"
+  alias rkubectl="rtk --ultra-compact kubectl"
+  alias rls="rtk --ultra-compact ls"
+  alias rtree="rtk --ultra-compact tree"
+  alias rdiff="rtk --ultra-compact diff"
+  alias rlog="rtk --ultra-compact log"
+  alias rerr="rtk --ultra-compact err"
+  alias rtest="rtk --ultra-compact test"
+  alias rjson="rtk --ultra-compact json"
+  alias rdeps="rtk --ultra-compact deps"
+  alias renv="rtk --ultra-compact env"
+  alias rgrep="rtk --ultra-compact grep"
+  alias rrg="rtk --ultra-compact rg"
+  alias rsummary="rtk --ultra-compact summary"
+
+  # Quick wrapper: pipe any command through rtk smart summary
+  rsmart() { rtk --ultra-compact smart "$@"; }
+
+  # RTK_MODE env var for hook-based integrations (jcode, Claude Code, etc.)
+  export RTK_MODE="full"
+fi
+
+# ==============================================================================
+# Caveman — token-efficient AI communication (full mode by default)
+# Docs: https://github.com/JuliusBrussee/caveman
+# Installed via: curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
+# Invoke in any AI session: /caveman   (defaults to full mode)
+# Modes: lite | full | ultra | wenyan-lite | wenyan-full | wenyan-ultra
+# ==============================================================================
+export CAVEMAN_MODE="full"   # default intensity for all AI agent sessions
+
 # Make directory and cd into it
 mkcd() { mkdir -p "$@" && cd "$_"; }
 
