@@ -1,0 +1,21 @@
+# Ignore OS/editor noise
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Never commit secrets
+*.env
+.env*
+!.env.example
+secrets/
+credentials
+
+# zsh compiled files
+*.zwc
+.zcompdump*
+
+# Backup files created by bootstrap
+*.bak.*
