@@ -247,6 +247,7 @@ else
   info "Installing nvm..."
   NVM_VER=$(latest_github_release "nvm-sh/nvm")
   run "curl -o- 'https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VER}/install.sh' | bash"
+  nvm install --lts
   success "nvm ${NVM_VER} installed"
 fi
 
