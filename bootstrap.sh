@@ -47,6 +47,7 @@ echo ""
 # APT packages
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
+  software-properties-common  # software-properties-common
   git curl wget unzip jq # git: version control
   zsh              # zsh: shell
   vim              # vim: text editor
@@ -68,21 +69,9 @@ APT_PACKAGES=(
 
 info "Installing APT packages..."
 if ! $DRY_RUN; then
-  sudo apt-get update -qq
+  sudo apt-get update
   sudo apt-get install -y "${APT_PACKAGES[@]}" 2>&1 | grep -E "^(Setting up|Unpacking|Get:)" || true
   sudo curl -LsSf https://astral.sh/uv/install.sh | sh
-fi
-
-# Symlink batcat → bat if needed
-if installed batcat && ! installed bat; then
-  run "ln -sf $(which batcat) $LOCAL_BIN/bat"
-  success "bat symlinked"
-fi
-
-# Symlink fdfind → fd if needed
-if installed fdfind && ! installed fd; then
-  run "ln -sf $(which fdfind) $LOCAL_BIN/fd"
-  success "fd symlinked"
 fi
 
 # ------------------------------------------------------------------------------
@@ -113,14 +102,49 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# LazyDocker
+# ------------------------------------------------------------------------------
+
+if installed lazydocker; then
+  warn "lazydocker already installed"
+else
+  info "Installing lazydocker..."
+  run "curl -fsSL https://raw.githubusercontent.com/jesseduffield/lazydocker/main/scripts/install_update_linux.sh | bash"
+  success "lazydocker installed"
+fi
+
+# ------------------------------------------------------------------------------
 # helm
 # ------------------------------------------------------------------------------
 if installed helm; then
   warn "helm already installed ($(helm version --short 2>/dev/null))"
 else
   info "Installing helm..."
-  run "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash"
+  run "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash"
   success "helm installed"
+fi
+
+# ------------------------------------------------------------------------------
+# dive
+# ------------------------------------------------------------------------------
+if installed dive; then
+  warn "dive already installed"
+else
+  info "Installing dive..."
+  DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+  sudo curl -fOL "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb"
+  sudo apt install ./dive_${DIVE_VERSION}_linux_amd64.deb
+  sudo rm -f ./dive_${DIVE_VERSION}_linux_amd64.deb
+fi
+
+# k9s
+# ------------------------------------------------------------------------------
+if installed k9s; then
+  warn "k9s already installed k9s ($(k9s version))"
+else
+  info "Installing k9s..."
+  curl -sS https://webi.sh/k9s | sh;
+  success "k9s installed"
 fi
 
 # ------------------------------------------------------------------------------
@@ -206,10 +230,11 @@ fi
 # ansible
 # ------------------------------------------------------------------------------
 if installed ansible; then
-  warn "ansible already installed"
+  warn "ansible already installed ($(ansible --version))"
 else
   info "Installing ansible..."
-  run "uv install --quiet ansible"
+  sudo add-apt-repository --yes --update ppa:ansible/ansible
+  sudo apt install -y ansible
   success "ansible installed"
 fi
 
