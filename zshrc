@@ -209,19 +209,11 @@ alias ~="cd ~"
 alias -- -="cd -"
 
 # ==============================================================================
-# Listing Aliases (use eza if available, fallback to ls)
+# Listing Aliases
 # ==============================================================================
-if command -v eza &>/dev/null; then
-  alias ls="eza --icons --group-directories-first"
-  alias ll="eza -alF --icons --group-directories-first --git"
-  alias la="eza -a --icons --group-directories-first"
-  alias lt="eza --tree --level=2 --icons"
-  alias llt="eza --tree --level=3 --icons --git"
-else
-  alias ls="ls --color=auto -h"
-  alias ll="ls -alF --color=auto"
-  alias la="ls -A --color=auto"
-fi
+alias ls="ls --color=auto -h"
+alias ll="ls -alF --color=auto"
+alias la="ls -A --color=auto"
 
 # ==============================================================================
 # Git Shortcuts
