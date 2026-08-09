@@ -83,32 +83,6 @@ if installed fdfind && ! installed fd; then
 fi
 
 # ------------------------------------------------------------------------------
-# fzf
-# ------------------------------------------------------------------------------
-if installed fzf; then
-  warn "fzf already installed ($(fzf --version))"
-else
-  info "Installing fzf..."
-  run "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
-  run "$HOME/.fzf/install --all --no-update-rc"
-  success "fzf installed"
-fi
-
-# ------------------------------------------------------------------------------
-# eza (modern ls replacement)
-# ------------------------------------------------------------------------------
-if installed eza; then
-  warn "eza already installed"
-else
-  info "Installing eza..."
-  EZA_VER=$(latest_github_release "eza-community/eza")
-  EZA_URL="https://github.com/eza-community/eza/releases/download/${EZA_VER}/eza_x86_64-unknown-linux-gnu.tar.gz"
-  run "curl -fsSL '$EZA_URL' | tar -xz -C $LOCAL_BIN eza"
-  run "chmod +x $LOCAL_BIN/eza"
-  success "eza ${EZA_VER} installed"
-fi
-
-# ------------------------------------------------------------------------------
 # kubectl
 # ------------------------------------------------------------------------------
 if installed kubectl; then
