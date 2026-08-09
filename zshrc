@@ -655,3 +655,6 @@ ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 # ==============================================================================
 source ~/powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Added by jcode installer
+export PATH="/home/yuurei/.local/bin:$PATH"

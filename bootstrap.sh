@@ -48,7 +48,7 @@ echo ""
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
   software-properties-common  # software-properties-common
-  git curl wget unzip jq # git: version control
+  git curl wget zip unzip jq # git: version control
   zsh              # zsh: shell
   vim              # vim: text editor
   build-essential  # build-essential: essential build tools
@@ -72,6 +72,31 @@ if ! $DRY_RUN; then
   sudo apt-get update
   sudo apt-get install -y "${APT_PACKAGES[@]}" 2>&1 | grep -E "^(Setting up|Unpacking|Get:)" || true
   sudo curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# -----------------------------------------------------------------------------
+# aws-cli
+# ------------------------------------------------------------------------------
+if installed aws; then
+  warn "aws already installed ($(aws --version 2>/dev/null | head -1))"
+else
+  info "Installing aws-cli..."
+  curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash
+  success "aws-cli installed"
+fi
+
+# ------------------------------------------------------------------------------
+# gcloud
+# ------------------------------------------------------------------------------
+if installed gcloud; then
+  warn "gcloud already installed ($(gcloud version 2>/dev/null | head -1))"
+else
+  info "Installing gcloud..."
+  sudo apt-get install apt-transport-https ca-certificates gnupg curl -y && \
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
+  curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+  sudo apt-get update -y && sudo apt-get install google-cloud-cli -y
+  gcloud components install gke-gcloud-auth-plugin
 fi
 
 # ------------------------------------------------------------------------------
@@ -137,6 +162,7 @@ else
   sudo rm -f ./dive_${DIVE_VERSION}_linux_amd64.deb
 fi
 
+# ------------------------------------------------------------------------------
 # k9s
 # ------------------------------------------------------------------------------
 if installed k9s; then
@@ -334,6 +360,18 @@ curl -f https://zed.dev/install.sh | sh
 curl -fsSL https://jcode.sh/install | bash
 curl -fsSL https://claude.ai/install.sh | bash
 curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
+
+# ------------------------------------------------------------------------------
+# Agent Skills
+# ------------------------------------------------------------------------------
+npx skills add getsentry/skills --skill security-review -g -y
+npx skills add https://github.com/vercel-labs/skills --skill find-skills -g -y
+npx skills add https://github.com/openai/skills --skill security-best-practices -y
+npx skills add google/skills -g -y
+npx skills add https://github.com/jeffallan/claude-skills --skill devops-engineer -g -y
+npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architect -g -y
 
 # ------------------------------------------------------------------------------
 # Done
