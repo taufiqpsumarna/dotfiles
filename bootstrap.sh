@@ -357,6 +357,7 @@ fi
 # Agentic CLI
 # ------------------------------------------------------------------------------
 curl -f https://zed.dev/install.sh | sh
+curl -fsSL https://herdr.dev/install.sh | sh
 curl -fsSL https://jcode.sh/install | bash
 curl -fsSL https://claude.ai/install.sh | bash
 curl -fsSL https://opencode.ai/install | bash
