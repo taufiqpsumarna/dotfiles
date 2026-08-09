@@ -47,10 +47,10 @@ echo ""
 # APT packages
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
-  git curl wget unzip jq
-  zsh
-  vim
-  build-essential
+  git curl wget unzip jq # git: version control
+  zsh              # zsh: shell
+  vim              # vim: text editor
+  build-essential  # build-essential: essential build tools
   htop             # interactive process viewer
   direnv           # per-directory env loading
   ripgrep          # rg: fast grep
@@ -59,15 +59,18 @@ APT_PACKAGES=(
   openssl          # ssl-check function
   net-tools        # netstat for ports() fallback
   iproute2         # ss for ports()
-  python3
-  python3-pip
-  python3-venv
+  dnsutils         # dnsutils: DNS lookup utilities
+  netcat-openbsd   # netcat-openbsd: TCP/IP swiss army knife
+  python3          # python3: Python 3 interpreter
+  python3-pip      # python3-pip: Python package installer
+  python3-venv     # python3-venv: Python virtual environment
 )
 
 info "Installing APT packages..."
 if ! $DRY_RUN; then
   sudo apt-get update -qq
   sudo apt-get install -y "${APT_PACKAGES[@]}" 2>&1 | grep -E "^(Setting up|Unpacking|Get:)" || true
+  sudo curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
 # Symlink batcat → bat if needed
@@ -174,29 +177,6 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# tfsec (Terraform security scanner)
-# ------------------------------------------------------------------------------
-if installed tfsec; then
-  warn "tfsec already installed"
-else
-  info "Installing tfsec..."
-  run "curl -fsSL 'https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64' -o $LOCAL_BIN/tfsec"
-  run "chmod +x $LOCAL_BIN/tfsec"
-  success "tfsec installed"
-fi
-
-# ------------------------------------------------------------------------------
-# checkov (IaC security scanner — Python)
-# ------------------------------------------------------------------------------
-if installed checkov; then
-  warn "checkov already installed"
-else
-  info "Installing checkov..."
-  run "pip3 install --quiet checkov"
-  success "checkov installed"
-fi
-
-# ------------------------------------------------------------------------------
 # GitHub CLI (gh)
 # ------------------------------------------------------------------------------
 if installed gh; then
@@ -213,13 +193,27 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# glab-cli (Gitlab CLI for GitLab)
+# ------------------------------------------------------------------------------
+if installed glab; then
+  warn "glab already installed"
+else
+  info "Installing glab..."
+  wget -qO - 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --dearmor | sudo tee /usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg > /dev/null
+  echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr $(lsb_release -cs)" | sudo tee /etc/apt/sources.list.d/prebuilt-mpr.list
+  sudo apt update
+  sudo apt install glab
+  success "glab installed"
+fi
+
+# ------------------------------------------------------------------------------
 # ansible
 # ------------------------------------------------------------------------------
 if installed ansible; then
   warn "ansible already installed"
 else
   info "Installing ansible..."
-  run "pip3 install --quiet ansible"
+  run "uv install --quiet ansible"
   success "ansible installed"
 fi
 
