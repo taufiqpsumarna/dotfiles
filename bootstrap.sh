@@ -200,7 +200,6 @@ if installed glab; then
 else
   info "Installing glab..."
   sudo snap install glab
-  sudo snap connect glab:ssh-keys
 fi
 
 # ------------------------------------------------------------------------------
