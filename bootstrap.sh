@@ -288,7 +288,7 @@ if [[ -d "$HOME/.oh-my-zsh" ]]; then
 else
   info "Installing oh-my-zsh..."
   run "RUNZSH=no CHSH=no sh -c \"\$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
-  cp "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+  cp "p10k.zsh" "$HOME/.p10k.zsh"
   success "oh-my-zsh installed"
 fi
 
