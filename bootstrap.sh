@@ -9,7 +9,7 @@ set -euo pipefail
 
 DRY_RUN=false
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
@@ -288,8 +288,9 @@ if [[ -d "$HOME/.oh-my-zsh" ]]; then
 else
   info "Installing oh-my-zsh..."
   run "RUNZSH=no CHSH=no sh -c \"\$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
-  cp "p10k.zsh" "$HOME/.p10k.zsh"
-  success "oh-my-zsh installed"
+  cp "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+  success "oh-my-zsh installed with powerlevel10k theme"
 fi
 
 # ------------------------------------------------------------------------------
@@ -328,6 +329,7 @@ fi
 # Symlink dotfiles
 # ------------------------------------------------------------------------------
 info "Symlinking dotfiles..."
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 link_file() {
   local src="$DOTFILES_DIR/$1"
