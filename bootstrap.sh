@@ -9,7 +9,7 @@ set -euo pipefail
 
 DRY_RUN=false
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
-
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
@@ -134,7 +134,7 @@ if installed lazydocker; then
   warn "lazydocker already installed"
 else
   info "Installing lazydocker..."
-  run "curl -fsSL https://raw.githubusercontent.com/jesseduffield/lazydocker/main/scripts/install_update_linux.sh | bash"
+  run "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash"
   success "lazydocker installed"
 fi
 
@@ -273,6 +273,9 @@ else
   info "Installing nvm..."
   NVM_VER=$(latest_github_release "nvm-sh/nvm")
   run "curl -o- 'https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VER}/install.sh' | bash"
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
   nvm install --lts
   success "nvm ${NVM_VER} installed"
 fi
@@ -325,7 +328,6 @@ fi
 # Symlink dotfiles
 # ------------------------------------------------------------------------------
 info "Symlinking dotfiles..."
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 link_file() {
   local src="$DOTFILES_DIR/$1"
