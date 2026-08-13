@@ -360,10 +360,20 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# Zed Editor
+# ------------------------------------------------------------------------------
+if installed zed; then
+  warn "zed already installed"
+else
+  info "Installing Zed..."
+  run "curl -f https://zed.dev/install.sh | sh"
+  success "zed installed"
+fi
+
+# ------------------------------------------------------------------------------
 # Agentic CLI
 # ------------------------------------------------------------------------------
 export NPM_CONFIG_ALLOW_GIT=all
-curl -f https://zed.dev/install.sh | sh
 curl -fsSL https://herdr.dev/install.sh | sh
 curl -fsSL https://jcode.sh/install | bash
 curl -fsSL https://claude.ai/install.sh | bash
