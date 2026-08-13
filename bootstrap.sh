@@ -47,6 +47,7 @@ echo ""
 # APT packages
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
+  fzf
   software-properties-common  # software-properties-common
   git curl wget zip unzip jq # git: version control
   zsh              # zsh: shell
