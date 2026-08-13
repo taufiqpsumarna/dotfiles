@@ -277,6 +277,7 @@ else
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
   nvm install --lts
+  nvm use lts
   success "nvm ${NVM_VER} installed"
 fi
 
@@ -360,6 +361,7 @@ fi
 # ------------------------------------------------------------------------------
 # Agentic CLI
 # ------------------------------------------------------------------------------
+export NPM_CONFIG_ALLOW_GIT=all
 curl -f https://zed.dev/install.sh | sh
 curl -fsSL https://herdr.dev/install.sh | sh
 curl -fsSL https://jcode.sh/install | bash
@@ -371,12 +373,12 @@ curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.
 # ------------------------------------------------------------------------------
 # Agent Skills
 # ------------------------------------------------------------------------------
-npx skills add getsentry/skills --skill security-review -g -y
-npx skills add https://github.com/vercel-labs/skills --skill find-skills -g -y
-npx skills add https://github.com/openai/skills --skill security-best-practices -y
-npx skills add google/skills -g -y
-npx skills add https://github.com/jeffallan/claude-skills --skill devops-engineer -g -y
-npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architect -g -y
+npx skills add getsentry/skills --skill security-review -g
+npx skills add https://github.com/vercel-labs/skills --skill find-skills -g
+npx skills add https://github.com/openai/skills --skill security-best-practices -g
+npx skills add google/skills -g
+npx skills add https://github.com/jeffallan/claude-skills --skill devops-engineer -g
+npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architect -g
 
 # ------------------------------------------------------------------------------
 # Done
