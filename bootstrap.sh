@@ -367,7 +367,7 @@ curl -fsSL https://herdr.dev/install.sh | sh
 curl -fsSL https://jcode.sh/install | bash
 curl -fsSL https://claude.ai/install.sh | bash
 curl -fsSL https://opencode.ai/install | bash
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | bash && rtk init --global
 curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
 
 # ------------------------------------------------------------------------------
@@ -379,6 +379,7 @@ npx skills add https://github.com/openai/skills --skill security-best-practices 
 npx skills add google/skills -g
 npx skills add https://github.com/jeffallan/claude-skills --skill devops-engineer -g
 npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architect -g
+
 
 # ------------------------------------------------------------------------------
 # Done
