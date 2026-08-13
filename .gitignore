@@ -1,5 +1,6 @@
 # Ignore OS/editor noise
 .DS_Store
+Thumbs.db
 *.swp
 *.swo
 *~
@@ -12,10 +13,30 @@
 !.env.example
 secrets/
 credentials
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+*.gpg
 
 # zsh compiled files
 *.zwc
 .zcompdump*
+.zsh_history
+.zsh_sessions/
 
 # Backup files created by bootstrap
+*.bak
 *.bak.*
+*.orig
+
+# Agent skills tooling (local install artifacts, not repo-managed)
+.agents/
+.claude/
+skills-lock.json
+
+# Local overrides / scratch
+.p10k.zsh
+*.local
+node_modules/
+*.log
