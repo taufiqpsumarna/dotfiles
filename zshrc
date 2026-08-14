@@ -663,3 +663,10 @@ fpath=(/home/taufiq/.oh-my-zsh/custom/completions /home/taufiq/.oh-my-zsh/custom
 
 # opencode
 export PATH=/home/taufiq/.opencode/bin:$PATH
+
+# bun completions
+[ -s "/home/taufiq/.bun/_bun" ] && source "/home/taufiq/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
