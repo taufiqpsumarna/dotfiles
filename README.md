@@ -28,11 +28,13 @@ Full ZSH configuration covering:
 | **Shell UX** | history-substring-search, fzf, colored-man-pages, autosuggestions, syntax-highlighting |
 | **History** | 50k entries, shared across sessions, deduped, timestamped |
 | **Completion** | Case-insensitive, menu-driven, colored, kill/process aware |
+| **Listing** | `eza` with icons + git status (fallback to plain `ls`), `lt` tree view |
 | **Git** | Aliases `g gs ga gaa gc gca gp gpl gl gds gsw gst` + `gli` fzf log browser |
 | **Docker** | Aliases `d dps dpsa dlogs dexec dc dcu dcd` + `dclean dprune drun` helpers |
 | **Kubernetes** | Aliases `k kg kd kgp kgpa kge ktop kaf kns` + `klogs kexec kwatch` functions |
 | **Terraform** | Aliases `tf tfi tfp tfa tfaa tfd tfdaa tfv tff tfs tfo` + `tfws` workspace helper |
-| **Security** | `sec-scan sec-secrets sec-dockerfile sec-git-history sec-deps sbom sec-iac ssl-check` |
+| **Ansible** | Aliases `ans ansp ansv ansl ansi` |
+| **Security** | `sec-scan sec-secrets sec-dockerfile sec-git-history sec-deps sbom sec-iac sec-k8s sec-compose sec-fs sec-quick ssl-check` |
 | **WSL2** | `pbcopy pbpaste exp cdwin`, Windows PATH integration |
 | **Python** | `py pip venv activate` |
 | **NVM** | Lazy-loaded (faster shell startup) |
@@ -44,16 +46,20 @@ Installs every tool referenced in `zshrc`. Idempotent — safe to re-run.
 **Installs:**
 - System packages: `git curl jq vim zsh ripgrep fd-find bat direnv openssl iproute2`
 - `fzf` (fuzzy finder)
-- `eza` (modern `ls`)
+- `eza` (modern `ls` with icons and git status)
 - `kubectl` + `kubectx` + `kubens`
 - `helm`
+- `k9s` (Kubernetes TUI)
+- `lazydocker` (Docker TUI)
+- `dive` (Docker image layer analyzer)
 - `terraform`
-- `trivy` (vuln/secret/IaC scanner)
+- `trivy` (vuln/secret/IaC scanner — replaces tfsec)
 - `hadolint` (Dockerfile linter)
-- `gitleaks` (git secret scanner)
-- `tfsec` (Terraform security scanner)
+- `trufflehog` (secret scanner — replaces gitleaks)
 - `checkov` (IaC security scanner)
-- `gh` (GitHub CLI)
+- `kube-score` (Kubernetes manifest linter)
+- `gh` (GitHub CLI) + `glab` (GitLab CLI)
+- `aws-cli` + `gcloud` CLI
 - `ansible`
 - `nvm` + Node LTS
 - `oh-my-zsh` + plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`)
@@ -77,17 +83,23 @@ Installs every tool referenced in `zshrc`. Idempotent — safe to re-run.
 ## Security Functions Quick Reference
 
 ```bash
-sec-scan nginx:latest        # Trivy vuln scan (MEDIUM+)
+sec-scan nginx:latest        # Trivy vuln scan (MEDIUM+, --ignore-unfixed)
 sec-scan ./myapp             # Trivy fs scan
 sec-secrets                  # Trivy secret + config scan (current dir)
 sec-dockerfile Dockerfile    # hadolint lint
-sec-git-history              # gitleaks git history scan
-sec-deps                     # Audit pip/npm/gem deps
+sec-git-history              # trufflehog git history scan
+sec-deps                     # Audit pip/npm/gem deps (--ignore-unfixed)
 sbom nginx:latest            # Generate CycloneDX SBOM
-sec-iac                      # tfsec + checkov + kube-score
+sec-iac                      # trivy config + checkov + kube-score
+sec-k8s ./manifests          # Scan k8s manifests (trivy + kube-score)
+sec-compose                  # Scan docker-compose.yml
+sec-fs                       # Trivy combined vuln + secret + misconfig scan
+sec-quick                    # One-shot security posture check on current dir
 ssl-check example.com        # TLS certificate details
 ports                        # Show listening ports
 ```
+
+> **Note:** All trivy-based scans use `--ignore-unfixed` to suppress noise from vulnerabilities without available patches.
 
 ---
 
@@ -97,9 +109,6 @@ Some tools require manual setup or are environment-specific:
 
 | Tool | Install |
 |---|---|
-| `kube-score` | `curl -fsSL https://github.com/zegl/kube-score/releases/latest/download/kube-score_linux_amd64.tar.gz \| tar -xz -C ~/.local/bin` |
-| AWS CLI | `curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/aws.zip && unzip /tmp/aws.zip -d /tmp && sudo /tmp/aws/install` |
-| Google Cloud SDK | `curl https://sdk.cloud.google.com \| bash` |
 | VS Code (WSL) | Install [VS Code](https://code.visualstudio.com/) on Windows + WSL extension |
 
 ---
@@ -130,7 +139,9 @@ aws configure
 
 ```
 dotfiles/
+├── CLAUDE.md      → project instructions for AI agents
 ├── zshrc          → ~/.zshrc
+├── p10k.zsh       → ~/.p10k.zsh
 ├── bootstrap.sh   → install all tools
 └── README.md
 ```
@@ -141,9 +152,7 @@ dotfiles/
 
 ```bash
 cd ~/dotfiles
-# Edit zshrc here, then sync back to home:
-cp ~/dotfiles/zshrc ~/.zshrc
-# Or if using symlink (bootstrap.sh default), edits are live immediately.
+# Edit zshrc here; symlink makes edits live immediately.
 source ~/.zshrc
 git add -A && git commit -m "update zshrc"
 ```

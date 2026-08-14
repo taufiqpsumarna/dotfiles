@@ -34,7 +34,7 @@ DISABLE_AUTO_UPDATE="false"
 DISABLE_UPDATE_PROMPT="false"
 export UPDATE_ZSH_DAYS=7
 DISABLE_MAGIC_FUNCTIONS="false"
-ENABLE_CORRECTION="false"          # avoid correction annoyance in devsecops cmds
+ENABLE_CORRECTION="false"          # correction handled by setopt CORRECT_ALL below
 COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
@@ -210,11 +210,18 @@ alias ~="cd ~"
 alias -- -="cd -"
 
 # ==============================================================================
-# Listing Aliases
+# Listing Aliases (eza if available, fallback to ls)
 # ==============================================================================
-alias ls="ls --color=auto -h"
-alias ll="ls -alF --color=auto"
-alias la="ls -A --color=auto"
+if command -v eza &>/dev/null; then
+  alias ls="eza --icons --group-directories-first"
+  alias ll="eza -la --icons --group-directories-first --git"
+  alias la="eza -a --icons --group-directories-first"
+  alias lt="eza --tree --level=2 --icons"
+else
+  alias ls="ls --color=auto -h"
+  alias ll="ls -alF --color=auto"
+  alias la="ls -A --color=auto"
+fi
 
 # ==============================================================================
 # Git Shortcuts
@@ -365,6 +372,15 @@ tf-ws() {
 alias tfws="tf-ws"
 
 # ==============================================================================
+# Ansible Shortcuts
+# ==============================================================================
+alias ans="ansible"
+alias ansp="ansible-playbook"
+alias ansv="ansible-vault"
+alias ansl="ansible-lint"
+alias ansi="ansible-inventory --list"
+
+# ==============================================================================
 # Security / DevSecOps Functions
 # ==============================================================================
 
@@ -375,15 +391,15 @@ sec-scan() {
     return 1
   fi
   if [ -d "$1" ]; then
-    trivy fs --severity MEDIUM,HIGH,CRITICAL "$1"
+    trivy fs --severity MEDIUM,HIGH,CRITICAL --ignore-unfixed "$1"
   else
-    trivy image --severity MEDIUM,HIGH,CRITICAL "$1"
+    trivy image --severity MEDIUM,HIGH,CRITICAL --ignore-unfixed "$1"
   fi
 }
 
 # Trivy: scan for secret leaks and misconfigs in a git repo
 sec-secrets() {
-  trivy repository --scanners config,secret "${1:-.}"
+  trivy repository --scanners config,secret --ignore-unfixed "${1:-.}"
 }
 
 # Scan a Dockerfile with hadolint
@@ -397,12 +413,12 @@ sec-dockerfile() {
   fi
 }
 
-# Check for exposed secrets in git history (gitleaks)
+# Check for exposed secrets in git history (trufflehog)
 sec-git-history() {
-  if command -v gitleaks &>/dev/null; then
-    gitleaks detect --source="${1:-.}" --verbose
+  if command -v trufflehog &>/dev/null; then
+    trufflehog git "file://${1:-.}" --only-verified
   else
-    echo "gitleaks not installed. Install: https://github.com/gitleaks/gitleaks"
+    echo "trufflehog not installed. Install: https://github.com/trufflesecurity/trufflehog"
     return 1
   fi
 }
@@ -411,7 +427,7 @@ sec-git-history() {
 sec-deps() {
   if [ -f "requirements.txt" ]; then
     echo "=== Python dependencies (trivy) ==="
-    trivy fs --scanners vuln requirements.txt
+    trivy fs --scanners vuln --ignore-unfixed requirements.txt
   fi
   if [ -f "package.json" ]; then
     echo "=== Node.js dependencies (npm audit) ==="
@@ -419,7 +435,7 @@ sec-deps() {
   fi
   if [ -f "Gemfile.lock" ]; then
     echo "=== Ruby dependencies (trivy) ==="
-    trivy fs --scanners vuln Gemfile.lock
+    trivy fs --scanners vuln --ignore-unfixed Gemfile.lock
   fi
 }
 
@@ -435,17 +451,59 @@ sbom() {
 
 # Lint IaC files in current directory
 sec-iac() {
-  if command -v tfsec &>/dev/null; then
-    echo "=== tfsec ==="
-    tfsec .
-  fi
+  echo "=== trivy config ==="
+  trivy config --severity MEDIUM,HIGH,CRITICAL --ignore-unfixed .
   if command -v checkov &>/dev/null; then
     echo "=== checkov ==="
-    checkov -d .
+    checkov -d . --quiet
   fi
   if command -v kube-score &>/dev/null && ls *.yaml >/dev/null 2>&1; then
     echo "=== kube-score ==="
     kube-score score *.yaml
+  fi
+}
+
+# Scan kubernetes manifests
+sec-k8s() {
+  local dir="${1:-.}"
+  echo "=== trivy k8s config ==="
+  trivy config --severity MEDIUM,HIGH,CRITICAL --ignore-unfixed "$dir"
+  if command -v kube-score &>/dev/null; then
+    echo "=== kube-score ==="
+    find "$dir" -name '*.yaml' -o -name '*.yml' | xargs -r kube-score score
+  fi
+}
+
+# Scan docker-compose files
+sec-compose() {
+  local file="${1:-docker-compose.yml}"
+  if [ ! -f "$file" ]; then
+    echo "No compose file found: $file"
+    return 1
+  fi
+  trivy config --severity MEDIUM,HIGH,CRITICAL --ignore-unfixed "$file"
+}
+
+# Trivy: combined vuln + secret + misconfig scan of a filesystem path
+sec-fs() {
+  trivy fs --scanners vuln,secret,misconfig --severity MEDIUM,HIGH,CRITICAL --ignore-unfixed "${1:-.}"
+}
+
+# Quick security posture check on current directory
+sec-quick() {
+  echo "=== trivy fs (vuln+secret+misconfig) ==="
+  sec-fs .
+  if command -v trufflehog &>/dev/null && [ -d .git ]; then
+    echo "=== trufflehog ==="
+    trufflehog git "file://." --only-verified
+  fi
+  if [ -f Dockerfile ]; then
+    echo "=== hadolint ==="
+    command -v hadolint &>/dev/null && hadolint Dockerfile
+  fi
+  if ls *.tf &>/dev/null 2>&1 || ls *.yaml &>/dev/null 2>&1; then
+    echo "=== IaC scan ==="
+    trivy config --severity HIGH,CRITICAL --ignore-unfixed .
   fi
 }
 
@@ -483,9 +541,12 @@ else
   alias grep="grep --color=auto"
 fi
 
-# bat for syntax-highlighted file viewing
+# bat for syntax-highlighted file viewing (Debian/Ubuntu installs as batcat)
 if command -v bat &>/dev/null; then
   alias cat="bat --style=numbers,changes"
+elif command -v batcat &>/dev/null; then
+  alias bat="batcat"
+  alias cat="batcat --style=numbers,changes"
 fi
 
 # Disk usage
@@ -658,7 +719,7 @@ source ~/powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Added by jcode installer
-export PATH="/home/yuurei/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 fpath=(/home/taufiq/.oh-my-zsh/custom/completions /home/taufiq/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting /home/taufiq/.oh-my-zsh/custom/plugins/zsh-autosuggestions /home/taufiq/.oh-my-zsh/plugins/copyfile /home/taufiq/.oh-my-zsh/plugins/copypath /home/taufiq/.oh-my-zsh/plugins/common-aliases /home/taufiq/.oh-my-zsh/plugins/aliases /home/taufiq/.oh-my-zsh/plugins/pip /home/taufiq/.oh-my-zsh/plugins/python /home/taufiq/.oh-my-zsh/plugins/npm /home/taufiq/.oh-my-zsh/plugins/node /home/taufiq/.oh-my-zsh/plugins/nvm /home/taufiq/.oh-my-zsh/plugins/dotenv /home/taufiq/.oh-my-zsh/plugins/command-not-found /home/taufiq/.oh-my-zsh/plugins/colored-man-pages /home/taufiq/.oh-my-zsh/plugins/history-substring-search /home/taufiq/.oh-my-zsh/plugins/aws /home/taufiq/.oh-my-zsh/plugins/ansible /home/taufiq/.oh-my-zsh/plugins/terraform /home/taufiq/.oh-my-zsh/plugins/helm /home/taufiq/.oh-my-zsh/plugins/kubectl /home/taufiq/.oh-my-zsh/plugins/docker-compose /home/taufiq/.oh-my-zsh/plugins/docker /home/taufiq/.oh-my-zsh/plugins/sudo /home/taufiq/.oh-my-zsh/plugins/gitignore /home/taufiq/.oh-my-zsh/plugins/git-extras /home/taufiq/.oh-my-zsh/plugins/git /home/taufiq/.oh-my-zsh/functions /home/taufiq/.oh-my-zsh/completions /home/taufiq/.oh-my-zsh/custom/functions /home/taufiq/.oh-my-zsh/custom/completions /home/taufiq/.oh-my-zsh/cache/completions /usr/local/share/zsh/site-functions /usr/share/zsh/vendor-functions /usr/share/zsh/vendor-completions /usr/share/zsh/functions/Calendar /usr/share/zsh/functions/Chpwd /usr/share/zsh/functions/Completion /usr/share/zsh/functions/Completion/AIX /usr/share/zsh/functions/Completion/BSD /usr/share/zsh/functions/Completion/Base /usr/share/zsh/functions/Completion/Cygwin /usr/share/zsh/functions/Completion/Darwin /usr/share/zsh/functions/Completion/Debian /usr/share/zsh/functions/Completion/Linux /usr/share/zsh/functions/Completion/Mandriva /usr/share/zsh/functions/Completion/Redhat /usr/share/zsh/functions/Completion/Solaris /usr/share/zsh/functions/Completion/Unix /usr/share/zsh/functions/Completion/X /usr/share/zsh/functions/Completion/Zsh /usr/share/zsh/functions/Completion/openSUSE /usr/share/zsh/functions/Exceptions /usr/share/zsh/functions/MIME /usr/share/zsh/functions/Math /usr/share/zsh/functions/Misc /usr/share/zsh/functions/Newuser /usr/share/zsh/functions/Prompts /usr/share/zsh/functions/TCP /usr/share/zsh/functions/VCS_Info /usr/share/zsh/functions/VCS_Info/Backends /usr/share/zsh/functions/Zftp /usr/share/zsh/functions/Zle)
 
 # opencode

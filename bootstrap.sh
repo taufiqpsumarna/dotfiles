@@ -214,17 +214,53 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# gitleaks (git secret scanner)
+# trufflehog (secret scanner)
 # ------------------------------------------------------------------------------
-if installed gitleaks; then
-  warn "gitleaks already installed"
+if installed trufflehog; then
+  warn "trufflehog already installed"
 else
-  info "Installing gitleaks..."
-  GL_VER=$(latest_github_release "gitleaks/gitleaks")
-  GL_VER_NUM="${GL_VER#v}"
-  run "curl -fsSL 'https://github.com/gitleaks/gitleaks/releases/download/${GL_VER}/gitleaks_${GL_VER_NUM}_linux_x64.tar.gz' | tar -xz -C $LOCAL_BIN gitleaks"
-  run "chmod +x $LOCAL_BIN/gitleaks"
-  success "gitleaks ${GL_VER} installed"
+  info "Installing trufflehog..."
+  run "curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b $LOCAL_BIN"
+  success "trufflehog installed"
+fi
+
+# ------------------------------------------------------------------------------
+# checkov (IaC security scanner)
+# ------------------------------------------------------------------------------
+if installed checkov; then
+  warn "checkov already installed ($(checkov --version 2>/dev/null | head -1))"
+else
+  info "Installing checkov..."
+  run "pip3 install --user checkov"
+  success "checkov installed"
+fi
+
+# ------------------------------------------------------------------------------
+# kube-score (Kubernetes manifest linter)
+# ------------------------------------------------------------------------------
+if installed kube-score; then
+  warn "kube-score already installed"
+else
+  info "Installing kube-score..."
+  KS_VER=$(latest_github_release "zegl/kube-score")
+  KS_VER_NUM="${KS_VER#v}"
+  run "curl -fsSL 'https://github.com/zegl/kube-score/releases/download/${KS_VER}/kube-score_${KS_VER_NUM}_linux_amd64.tar.gz' | tar -xz -C $LOCAL_BIN kube-score"
+  run "chmod +x $LOCAL_BIN/kube-score"
+  success "kube-score ${KS_VER} installed"
+fi
+
+# ------------------------------------------------------------------------------
+# eza (modern ls replacement)
+# ------------------------------------------------------------------------------
+if installed eza; then
+  warn "eza already installed"
+else
+  info "Installing eza..."
+  EZA_VER=$(latest_github_release "eza-community/eza")
+  EZA_VER_NUM="${EZA_VER#v}"
+  run "curl -fsSL 'https://github.com/eza-community/eza/releases/download/${EZA_VER}/eza_x86_64-unknown-linux-gnu.tar.gz' | tar -xz -C $LOCAL_BIN"
+  run "chmod +x $LOCAL_BIN/eza"
+  success "eza ${EZA_VER} installed"
 fi
 
 # ------------------------------------------------------------------------------
@@ -290,7 +326,6 @@ if [[ -d "$HOME/.oh-my-zsh" ]]; then
 else
   info "Installing oh-my-zsh..."
   run "RUNZSH=no CHSH=no sh -c \"\$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
-  cp "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
   success "oh-my-zsh installed with powerlevel10k theme"
 fi
@@ -347,6 +382,7 @@ link_file() {
 }
 
 link_file zshrc zshrc
+link_file p10k.zsh p10k.zsh
 
 # ------------------------------------------------------------------------------
 # Set zsh as default shell
