@@ -184,8 +184,9 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
 
   # Zed editor (Windows install, accessible from WSL2)
   export PATH="$PATH:$WINHOME/AppData/Local/Programs/Zed/bin"
-  alias ze="zed ."       # open current dir in Zed
-  alias zed.="zed ."
+  alias zed="zed.exe"
+  alias ze="zed.exe ."       # open current dir in Zed
+  alias zed.="zed.exe ."
 
   # Fix interop for running Windows executables
   export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
