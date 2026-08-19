@@ -9,6 +9,10 @@ fi
 # Path & Core Exports
 # ==============================================================================
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+typeset -U PATH path  # dedupe PATH entries (WSL interop + oh-my-zsh both append Windows paths)
+
+# DevSecOps: default umask 077 (owner-only new files) instead of 022
+umask 077
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="vim"
 export VISUAL="vim"
@@ -89,6 +93,7 @@ source $ZSH/oh-my-zsh.sh
 HISTSIZE=50000
 SAVEHIST=50000
 HISTFILE="$HOME/.zsh_history"
+[[ -f "$HISTFILE" ]] && chmod 600 "$HISTFILE"  # DevSecOps: history can contain secrets, owner-only
 
 setopt HIST_EXPIRE_DUPS_FIRST  # expire duplicates first when trimming
 setopt HIST_IGNORE_DUPS        # don't record duplicate consecutive commands
@@ -731,3 +736,11 @@ export PATH=/home/taufiq/.opencode/bin:$PATH
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# ==============================================================================
+# WSL: fix slow `gcloud auth login` browser-open (Python webbrowser module
+# probes ~15 hardcoded binaries via PATH lookups before falling back; with
+# 27 duplicated /mnt/c/* PATH entries each lookup crosses the WSL interop
+# boundary, adding many seconds). Setting BROWSER skips the probing loop.
+# ==============================================================================
+export BROWSER="/mnt/c/windows/explorer.exe"
