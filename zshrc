@@ -9,6 +9,10 @@ fi
 # Path & Core Exports
 # ==============================================================================
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+typeset -U PATH path  # dedupe PATH entries (WSL interop + oh-my-zsh both append Windows paths)
+
+# DevSecOps: default umask 077 (owner-only new files) instead of 022
+umask 077
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="vim"
 export VISUAL="vim"
@@ -89,6 +93,7 @@ source $ZSH/oh-my-zsh.sh
 HISTSIZE=50000
 SAVEHIST=50000
 HISTFILE="$HOME/.zsh_history"
+[[ -f "$HISTFILE" ]] && chmod 600 "$HISTFILE"  # DevSecOps: history can contain secrets, owner-only
 
 setopt HIST_EXPIRE_DUPS_FIRST  # expire duplicates first when trimming
 setopt HIST_IGNORE_DUPS        # don't record duplicate consecutive commands
@@ -182,11 +187,9 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
   export WINHOME="/mnt/c/Users/$(cmd.exe /c echo %USERNAME% 2>/dev/null | tr -d '\r\n')"
   alias cdwin="cd '$WINHOME'"
 
-  # Zed editor (Windows install, accessible from WSL2)
-  export PATH="$PATH:$WINHOME/AppData/Local/Programs/Zed/bin"
-  alias zed="zed.exe"
-  alias ze="zed.exe ."       # open current dir in Zed
-  alias zed.="zed.exe ."
+  # Zed editor (native Linux binary in WSL2, not Windows exe via powershell)
+  alias ze="zed ."       # open current dir in Zed
+  alias zed.="zed ."
 
   # Fix interop for running Windows executables
   export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
