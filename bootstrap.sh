@@ -47,9 +47,9 @@ echo ""
 # APT packages
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
-  fzf
   software-properties-common  # software-properties-common
   git curl wget zip unzip jq # git: version control
+  fzf              # fzf: A command-line fuzzy finder
   zsh              # zsh: shell
   vim              # vim: text editor
   build-essential  # build-essential: essential build tools
@@ -222,17 +222,6 @@ else
   info "Installing trufflehog..."
   run "curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b $LOCAL_BIN"
   success "trufflehog installed"
-fi
-
-# ------------------------------------------------------------------------------
-# checkov (IaC security scanner)
-# ------------------------------------------------------------------------------
-if installed checkov; then
-  warn "checkov already installed ($(checkov --version 2>/dev/null | head -1))"
-else
-  info "Installing checkov..."
-  run "pip3 install --user checkov"
-  success "checkov installed"
 fi
 
 # ------------------------------------------------------------------------------
