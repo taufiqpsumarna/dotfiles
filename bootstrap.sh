@@ -47,10 +47,12 @@ echo ""
 # APT packages
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
-  git curl wget unzip jq
-  zsh
-  vim
-  build-essential
+  fzf
+  software-properties-common  # software-properties-common
+  git curl wget zip unzip jq # git: version control
+  zsh              # zsh: shell
+  vim              # vim: text editor
+  build-essential  # build-essential: essential build tools
   htop             # interactive process viewer
   direnv           # per-directory env loading
   ripgrep          # rg: fast grep
@@ -59,53 +61,43 @@ APT_PACKAGES=(
   openssl          # ssl-check function
   net-tools        # netstat for ports() fallback
   iproute2         # ss for ports()
-  python3
-  python3-pip
-  python3-venv
+  dnsutils         # dnsutils: DNS lookup utilities
+  netcat-openbsd   # netcat-openbsd: TCP/IP swiss army knife
+  python3          # python3: Python 3 interpreter
+  python3-pip      # python3-pip: Python package installer
+  python3-venv     # python3-venv: Python virtual environment
 )
 
 info "Installing APT packages..."
 if ! $DRY_RUN; then
-  sudo apt-get update -qq
+  sudo apt-get update
   sudo apt-get install -y "${APT_PACKAGES[@]}" 2>&1 | grep -E "^(Setting up|Unpacking|Get:)" || true
+  sudo curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
-# Symlink batcat → bat if needed
-if installed batcat && ! installed bat; then
-  run "ln -sf $(which batcat) $LOCAL_BIN/bat"
-  success "bat symlinked"
-fi
-
-# Symlink fdfind → fd if needed
-if installed fdfind && ! installed fd; then
-  run "ln -sf $(which fdfind) $LOCAL_BIN/fd"
-  success "fd symlinked"
-fi
-
+# -----------------------------------------------------------------------------
+# aws-cli
 # ------------------------------------------------------------------------------
-# fzf
-# ------------------------------------------------------------------------------
-if installed fzf; then
-  warn "fzf already installed ($(fzf --version))"
+if installed aws; then
+  warn "aws already installed ($(aws --version 2>/dev/null | head -1))"
 else
-  info "Installing fzf..."
-  run "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
-  run "$HOME/.fzf/install --all --no-update-rc"
-  success "fzf installed"
+  info "Installing aws-cli..."
+  curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash
+  success "aws-cli installed"
 fi
 
 # ------------------------------------------------------------------------------
-# eza (modern ls replacement)
+# gcloud
 # ------------------------------------------------------------------------------
-if installed eza; then
-  warn "eza already installed"
+if installed gcloud; then
+  warn "gcloud already installed ($(gcloud version 2>/dev/null | head -1))"
 else
-  info "Installing eza..."
-  EZA_VER=$(latest_github_release "eza-community/eza")
-  EZA_URL="https://github.com/eza-community/eza/releases/download/${EZA_VER}/eza_x86_64-unknown-linux-gnu.tar.gz"
-  run "curl -fsSL '$EZA_URL' | tar -xz -C $LOCAL_BIN eza"
-  run "chmod +x $LOCAL_BIN/eza"
-  success "eza ${EZA_VER} installed"
+  info "Installing gcloud..."
+  sudo apt-get install apt-transport-https ca-certificates gnupg curl -y && \
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
+  curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+  sudo apt-get update -y && sudo apt-get install google-cloud-cli -y
+  gcloud components install gke-gcloud-auth-plugin
 fi
 
 # ------------------------------------------------------------------------------
@@ -136,14 +128,50 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# LazyDocker
+# ------------------------------------------------------------------------------
+
+if installed lazydocker; then
+  warn "lazydocker already installed"
+else
+  info "Installing lazydocker..."
+  run "curl https://raw.githubusercontent.com/jesseduffield/lazydocker/master/scripts/install_update_linux.sh | bash"
+  success "lazydocker installed"
+fi
+
+# ------------------------------------------------------------------------------
 # helm
 # ------------------------------------------------------------------------------
 if installed helm; then
   warn "helm already installed ($(helm version --short 2>/dev/null))"
 else
   info "Installing helm..."
-  run "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash"
+  run "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash"
   success "helm installed"
+fi
+
+# ------------------------------------------------------------------------------
+# dive
+# ------------------------------------------------------------------------------
+if installed dive; then
+  warn "dive already installed"
+else
+  info "Installing dive..."
+  DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+  sudo curl -fOL "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb"
+  sudo apt install ./dive_${DIVE_VERSION}_linux_amd64.deb
+  sudo rm -f ./dive_${DIVE_VERSION}_linux_amd64.deb
+fi
+
+# ------------------------------------------------------------------------------
+# k9s
+# ------------------------------------------------------------------------------
+if installed k9s; then
+  warn "k9s already installed k9s ($(k9s version))"
+else
+  info "Installing k9s..."
+  curl -sS https://webi.sh/k9s | sh;
+  success "k9s installed"
 fi
 
 # ------------------------------------------------------------------------------
@@ -186,40 +214,53 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# gitleaks (git secret scanner)
+# trufflehog (secret scanner)
 # ------------------------------------------------------------------------------
-if installed gitleaks; then
-  warn "gitleaks already installed"
+if installed trufflehog; then
+  warn "trufflehog already installed"
 else
-  info "Installing gitleaks..."
-  GL_VER=$(latest_github_release "gitleaks/gitleaks")
-  GL_VER_NUM="${GL_VER#v}"
-  run "curl -fsSL 'https://github.com/gitleaks/gitleaks/releases/download/${GL_VER}/gitleaks_${GL_VER_NUM}_linux_x64.tar.gz' | tar -xz -C $LOCAL_BIN gitleaks"
-  run "chmod +x $LOCAL_BIN/gitleaks"
-  success "gitleaks ${GL_VER} installed"
+  info "Installing trufflehog..."
+  run "curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b $LOCAL_BIN"
+  success "trufflehog installed"
 fi
 
 # ------------------------------------------------------------------------------
-# tfsec (Terraform security scanner)
-# ------------------------------------------------------------------------------
-if installed tfsec; then
-  warn "tfsec already installed"
-else
-  info "Installing tfsec..."
-  run "curl -fsSL 'https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64' -o $LOCAL_BIN/tfsec"
-  run "chmod +x $LOCAL_BIN/tfsec"
-  success "tfsec installed"
-fi
-
-# ------------------------------------------------------------------------------
-# checkov (IaC security scanner — Python)
+# checkov (IaC security scanner)
 # ------------------------------------------------------------------------------
 if installed checkov; then
-  warn "checkov already installed"
+  warn "checkov already installed ($(checkov --version 2>/dev/null | head -1))"
 else
   info "Installing checkov..."
-  run "pip3 install --quiet checkov"
+  run "pip3 install --user checkov"
   success "checkov installed"
+fi
+
+# ------------------------------------------------------------------------------
+# kube-score (Kubernetes manifest linter)
+# ------------------------------------------------------------------------------
+if installed kube-score; then
+  warn "kube-score already installed"
+else
+  info "Installing kube-score..."
+  KS_VER=$(latest_github_release "zegl/kube-score")
+  KS_VER_NUM="${KS_VER#v}"
+  run "curl -fsSL 'https://github.com/zegl/kube-score/releases/download/${KS_VER}/kube-score_${KS_VER_NUM}_linux_amd64.tar.gz' | tar -xz -C $LOCAL_BIN kube-score"
+  run "chmod +x $LOCAL_BIN/kube-score"
+  success "kube-score ${KS_VER} installed"
+fi
+
+# ------------------------------------------------------------------------------
+# eza (modern ls replacement)
+# ------------------------------------------------------------------------------
+if installed eza; then
+  warn "eza already installed"
+else
+  info "Installing eza..."
+  EZA_VER=$(latest_github_release "eza-community/eza")
+  EZA_VER_NUM="${EZA_VER#v}"
+  run "curl -fsSL 'https://github.com/eza-community/eza/releases/download/${EZA_VER}/eza_x86_64-unknown-linux-gnu.tar.gz' | tar -xz -C $LOCAL_BIN"
+  run "chmod +x $LOCAL_BIN/eza"
+  success "eza ${EZA_VER} installed"
 fi
 
 # ------------------------------------------------------------------------------
@@ -239,13 +280,24 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# glab-cli (Gitlab CLI for GitLab)
+# ------------------------------------------------------------------------------
+if installed glab; then
+  warn "glab already installed"
+else
+  info "Installing glab..."
+  sudo snap install glab
+fi
+
+# ------------------------------------------------------------------------------
 # ansible
 # ------------------------------------------------------------------------------
 if installed ansible; then
-  warn "ansible already installed"
+  warn "ansible already installed ($(ansible --version))"
 else
   info "Installing ansible..."
-  run "pip3 install --quiet ansible"
+  sudo add-apt-repository --yes --update ppa:ansible/ansible
+  sudo apt install -y ansible
   success "ansible installed"
 fi
 
@@ -258,6 +310,11 @@ else
   info "Installing nvm..."
   NVM_VER=$(latest_github_release "nvm-sh/nvm")
   run "curl -o- 'https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VER}/install.sh' | bash"
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  nvm install --lts
+  nvm use lts
   success "nvm ${NVM_VER} installed"
 fi
 
@@ -269,7 +326,8 @@ if [[ -d "$HOME/.oh-my-zsh" ]]; then
 else
   info "Installing oh-my-zsh..."
   run "RUNZSH=no CHSH=no sh -c \"\$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)\""
-  success "oh-my-zsh installed"
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+  success "oh-my-zsh installed with powerlevel10k theme"
 fi
 
 # ------------------------------------------------------------------------------
@@ -324,6 +382,7 @@ link_file() {
 }
 
 link_file zshrc zshrc
+link_file p10k.zsh p10k.zsh
 
 # ------------------------------------------------------------------------------
 # Set zsh as default shell
@@ -335,6 +394,39 @@ if [[ "$SHELL" != "$(which zsh)" ]]; then
 else
   warn "zsh is already the default shell"
 fi
+
+# ------------------------------------------------------------------------------
+# Zed Editor
+# ------------------------------------------------------------------------------
+if installed zed; then
+  warn "zed already installed"
+else
+  info "Installing Zed..."
+  run "curl -f https://zed.dev/install.sh | sh"
+  success "zed installed"
+fi
+
+# ------------------------------------------------------------------------------
+# Agentic CLI
+# ------------------------------------------------------------------------------
+export NPM_CONFIG_ALLOW_GIT=all
+curl -fsSL https://herdr.dev/install.sh | sh
+curl -fsSL https://jcode.sh/install | bash
+curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | bash && rtk init --global
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
+
+# ------------------------------------------------------------------------------
+# Agent Skills
+# ------------------------------------------------------------------------------
+npx skills add getsentry/skills --skill security-review -g
+npx skills add https://github.com/vercel-labs/skills --skill find-skills -g
+npx skills add https://github.com/openai/skills --skill security-best-practices -g
+npx skills add google/skills -g
+npx skills add https://github.com/jeffallan/claude-skills --skill devops-engineer -g
+npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architect -g
+
 
 # ------------------------------------------------------------------------------
 # Done
