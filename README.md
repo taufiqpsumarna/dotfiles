@@ -45,6 +45,7 @@ Installs every tool referenced in `zshrc`. Idempotent — safe to re-run.
 
 **Installs:**
 - System packages: `git curl jq vim zsh ripgrep fd-find bat direnv openssl iproute2`
+- Homebrew for Linux
 - `fzf` (fuzzy finder)
 - `eza` (modern `ls` with icons and git status)
 - `kubectl` + `kubectx` + `kubens`

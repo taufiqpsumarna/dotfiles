@@ -48,6 +48,7 @@ echo ""
 # ------------------------------------------------------------------------------
 APT_PACKAGES=(
   software-properties-common  # software-properties-common
+  build-essential procps curl file git # Brew
   git curl wget zip unzip jq # git: version control
   fzf              # fzf: A command-line fuzzy finder
   zsh              # zsh: shell
@@ -72,7 +73,39 @@ info "Installing APT packages..."
 if ! $DRY_RUN; then
   sudo apt-get update
   sudo apt-get install -y "${APT_PACKAGES[@]}" 2>&1 | grep -E "^(Setting up|Unpacking|Get:)" || true
-  sudo curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# ------------------------------------------------------------------------------
+# Homebrew for Linux
+# ------------------------------------------------------------------------------
+BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
+if installed brew || [[ -x "$BREW_BIN" ]]; then
+  warn "Homebrew already installed"
+else
+  info "Installing Homebrew..."
+  run "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+  success "Homebrew installed"
+fi
+
+if [[ -x "$BREW_BIN" ]]; then
+  eval "$($BREW_BIN shellenv)"
+  for shell_rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if ! grep -Fq 'linuxbrew/.linuxbrew/bin/brew shellenv' "$shell_rc" 2>/dev/null; then
+      printf '%s\n' 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$shell_rc"
+    fi
+  done
+fi
+
+# ------------------------------------------------------------------------------
+# uv (Python package and project manager)
+# ------------------------------------------------------------------------------
+if installed uv; then
+  warn "uv already installed ($(uv --version 2>/dev/null))"
+else
+  info "Installing uv..."
+  run "curl -LsSf https://astral.sh/uv/install.sh | sh"
+  export PATH="$LOCAL_BIN:$PATH"
+  success "uv installed"
 fi
 
 # -----------------------------------------------------------------------------
@@ -275,7 +308,7 @@ if installed glab; then
   warn "glab already installed"
 else
   info "Installing glab..."
-  sudo snap install glab
+  brew install glab
 fi
 
 # ------------------------------------------------------------------------------
@@ -293,19 +326,36 @@ fi
 # ------------------------------------------------------------------------------
 # nvm
 # ------------------------------------------------------------------------------
-if [[ -d "$HOME/.nvm" ]]; then
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+NVM_SYSTEM_DIR="/usr/local/share/nvm"
+if [[ ! -s "$NVM_DIR/nvm.sh" && -s "$NVM_SYSTEM_DIR/nvm.sh" ]]; then
+  NVM_DIR="$NVM_SYSTEM_DIR"
+fi
+export NVM_DIR
+
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
   warn "nvm already installed"
 else
   info "Installing nvm..."
   NVM_VER=$(latest_github_release "nvm-sh/nvm")
   run "curl -o- 'https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VER}/install.sh' | bash"
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-  nvm install --lts
-  nvm use lts
-  success "nvm ${NVM_VER} installed"
 fi
+
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+  # nvm is a shell function, so load it into this bootstrap process.
+  . "$NVM_DIR/nvm.sh"
+  [[ -s "$NVM_DIR/bash_completion" ]] && . "$NVM_DIR/bash_completion"
+else
+  err "nvm installation did not create $NVM_DIR/nvm.sh"
+  exit 1
+fi
+
+# nvm's shell implementation is not compatible with Bash nounset mode.
+set +u
+nvm install --lts
+nvm use --lts
+set -u
+success "nvm available with $(node -v) and $(npm -v)"
 
 # ------------------------------------------------------------------------------
 # Oh My Zsh
@@ -376,10 +426,18 @@ link_file p10k.zsh p10k.zsh
 # ------------------------------------------------------------------------------
 # Set zsh as default shell
 # ------------------------------------------------------------------------------
-if [[ "$SHELL" != "$(which zsh)" ]]; then
-  info "Setting zsh as default shell..."
-  run "chsh -s $(which zsh)"
-  success "Default shell changed to zsh (re-login to take effect)"
+ZSH_PATH="$(command -v zsh)"
+LOGIN_SHELL="$(getent passwd "$USER" | cut -d: -f7)"
+if [[ "$LOGIN_SHELL" != "$ZSH_PATH" ]]; then
+  if [[ "${CODESPACES:-false}" == "true" && "${BOOTSTRAP_CHANGE_SHELL:-false}" != "true" ]]; then
+    warn "Skipping default shell change in Codespaces"
+  elif $DRY_RUN; then
+    run "chsh -s '$ZSH_PATH' '$USER'"
+  elif chsh -s "$ZSH_PATH" "$USER"; then
+    success "Default shell changed to zsh (re-login to take effect)"
+  else
+    warn "Could not change the default shell; run 'chsh -s $ZSH_PATH' manually"
+  fi
 else
   warn "zsh is already the default shell"
 fi
