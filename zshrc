@@ -160,19 +160,11 @@ elif [[ -f ~/.fzf.zsh ]]; then
 fi
 
 # ==============================================================================
-# NVM — Lazy Loading (faster shell startup)
+# NVM & Node
 # ==============================================================================
 export NVM_DIR="$HOME/.nvm"
-# Lazy-load nvm: only source it when node/npm/nvm is first called
-_nvm_lazy_load() {
-  unfunction nvm node npm npx 2>/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
-}
-nvm()  { _nvm_lazy_load; nvm "$@"; }
-node() { _nvm_lazy_load; node "$@"; }
-npm()  { _nvm_lazy_load; npm "$@"; }
-npx()  { _nvm_lazy_load; npx "$@"; }
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
 
 # ==============================================================================
 # WSL2 Helpers
