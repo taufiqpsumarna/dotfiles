@@ -145,8 +145,14 @@ if command -v fzf &>/dev/null; then
   fi
   export FZF_CTRL_R_OPTS="--sort --exact --preview 'echo {}' --preview-window=down:3:wrap"
   export FZF_ALT_C_OPTS="--preview 'ls -la {}'"
-  # Source fzf keybindings if installed via git
-  [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
+  # Source fzf completions & keybindings (package manager or git install)
+  if [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+    source /usr/share/doc/fzf/examples/completion.zsh
+  elif [[ -f ~/.fzf.zsh ]]; then
+    source ~/.fzf.zsh
+  fi
 elif [[ -f ~/.fzf.zsh ]]; then
   # fzf installed but not in PATH yet
   source ~/.fzf.zsh
@@ -154,19 +160,11 @@ elif [[ -f ~/.fzf.zsh ]]; then
 fi
 
 # ==============================================================================
-# NVM — Lazy Loading (faster shell startup)
+# NVM & Node
 # ==============================================================================
 export NVM_DIR="$HOME/.nvm"
-# Lazy-load nvm: only source it when node/npm/nvm is first called
-_nvm_lazy_load() {
-  unfunction nvm node npm npx 2>/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
-}
-nvm()  { _nvm_lazy_load; nvm "$@"; }
-node() { _nvm_lazy_load; node "$@"; }
-npm()  { _nvm_lazy_load; npm "$@"; }
-npx()  { _nvm_lazy_load; npx "$@"; }
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
 
 # ==============================================================================
 # WSL2 Helpers
@@ -704,7 +702,6 @@ bindkey '^E' end-of-line
 bindkey '^[[H' beginning-of-line             # Home key
 bindkey '^[[F' end-of-line                   # End key
 bindkey '^[[3~' delete-char                  # Delete key
-bindkey '^R' history-incremental-search-backward
 # Ctrl+F: fzf file picker (only if fzf is installed)
 command -v fzf &>/dev/null && bindkey '^F' fzf-file-widget
 
@@ -734,3 +731,10 @@ export PATH=/home/taufiq/.opencode/bin:$PATH
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+
+# Added by codebase-memory-mcp install
+export PATH="/home/taufiq/.local/bin:$PATH"
+
+
