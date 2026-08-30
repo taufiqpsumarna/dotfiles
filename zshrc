@@ -145,8 +145,14 @@ if command -v fzf &>/dev/null; then
   fi
   export FZF_CTRL_R_OPTS="--sort --exact --preview 'echo {}' --preview-window=down:3:wrap"
   export FZF_ALT_C_OPTS="--preview 'ls -la {}'"
-  # Source fzf keybindings if installed via git
-  [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
+  # Source fzf completions & keybindings (package manager or git install)
+  if [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+    source /usr/share/doc/fzf/examples/completion.zsh
+  elif [[ -f ~/.fzf.zsh ]]; then
+    source ~/.fzf.zsh
+  fi
 elif [[ -f ~/.fzf.zsh ]]; then
   # fzf installed but not in PATH yet
   source ~/.fzf.zsh
@@ -704,7 +710,6 @@ bindkey '^E' end-of-line
 bindkey '^[[H' beginning-of-line             # Home key
 bindkey '^[[F' end-of-line                   # End key
 bindkey '^[[3~' delete-char                  # Delete key
-bindkey '^R' history-incremental-search-backward
 # Ctrl+F: fzf file picker (only if fzf is installed)
 command -v fzf &>/dev/null && bindkey '^F' fzf-file-widget
 
@@ -735,10 +740,9 @@ export PATH=/home/taufiq/.opencode/bin:$PATH
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# ==============================================================================
-# WSL: fix slow `gcloud auth login` browser-open (Python webbrowser module
-# probes ~15 hardcoded binaries via PATH lookups before falling back; with
-# 27 duplicated /mnt/c/* PATH entries each lookup crosses the WSL interop
-# boundary, adding many seconds). Setting BROWSER skips the probing loop.
-# ==============================================================================
-export BROWSER="/mnt/c/windows/explorer.exe"
+
+
+# Added by codebase-memory-mcp install
+export PATH="/home/taufiq/.local/bin:$PATH"
+
+
