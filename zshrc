@@ -9,6 +9,10 @@ fi
 # Path & Core Exports
 # ==============================================================================
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+typeset -U PATH path  # dedupe PATH entries (WSL interop + oh-my-zsh both append Windows paths)
+
+# DevSecOps: default umask 077 (owner-only new files) instead of 022
+umask 077
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="vim"
 export VISUAL="vim"
@@ -89,6 +93,7 @@ source $ZSH/oh-my-zsh.sh
 HISTSIZE=50000
 SAVEHIST=50000
 HISTFILE="$HOME/.zsh_history"
+[[ -f "$HISTFILE" ]] && chmod 600 "$HISTFILE"  # DevSecOps: history can contain secrets, owner-only
 
 setopt HIST_EXPIRE_DUPS_FIRST  # expire duplicates first when trimming
 setopt HIST_IGNORE_DUPS        # don't record duplicate consecutive commands
@@ -140,8 +145,14 @@ if command -v fzf &>/dev/null; then
   fi
   export FZF_CTRL_R_OPTS="--sort --exact --preview 'echo {}' --preview-window=down:3:wrap"
   export FZF_ALT_C_OPTS="--preview 'ls -la {}'"
-  # Source fzf keybindings if installed via git
-  [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
+  # Source fzf completions & keybindings (package manager or git install)
+  if [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+    source /usr/share/doc/fzf/examples/completion.zsh
+  elif [[ -f ~/.fzf.zsh ]]; then
+    source ~/.fzf.zsh
+  fi
 elif [[ -f ~/.fzf.zsh ]]; then
   # fzf installed but not in PATH yet
   source ~/.fzf.zsh
@@ -149,19 +160,11 @@ elif [[ -f ~/.fzf.zsh ]]; then
 fi
 
 # ==============================================================================
-# NVM — Lazy Loading (faster shell startup)
+# NVM & Node
 # ==============================================================================
 export NVM_DIR="$HOME/.nvm"
-# Lazy-load nvm: only source it when node/npm/nvm is first called
-_nvm_lazy_load() {
-  unfunction nvm node npm npx 2>/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
-}
-nvm()  { _nvm_lazy_load; nvm "$@"; }
-node() { _nvm_lazy_load; node "$@"; }
-npm()  { _nvm_lazy_load; npm "$@"; }
-npx()  { _nvm_lazy_load; npx "$@"; }
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
 
 # ==============================================================================
 # WSL2 Helpers
@@ -182,11 +185,9 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
   export WINHOME="/mnt/c/Users/$(cmd.exe /c echo %USERNAME% 2>/dev/null | tr -d '\r\n')"
   alias cdwin="cd '$WINHOME'"
 
-  # Zed editor (Windows install, accessible from WSL2)
-  export PATH="$PATH:$WINHOME/AppData/Local/Programs/Zed/bin"
-  alias zed="zed.exe"
-  alias ze="zed.exe ."       # open current dir in Zed
-  alias zed.="zed.exe ."
+  # Zed editor (native Linux binary in WSL2, not Windows exe via powershell)
+  alias ze="zed ."       # open current dir in Zed
+  alias zed.="zed ."
 
   # Fix interop for running Windows executables
   export PATH="$PATH:/mnt/c/Windows/System32:/mnt/c/Windows"
@@ -701,7 +702,6 @@ bindkey '^E' end-of-line
 bindkey '^[[H' beginning-of-line             # Home key
 bindkey '^[[F' end-of-line                   # End key
 bindkey '^[[3~' delete-char                  # Delete key
-bindkey '^R' history-incremental-search-backward
 # Ctrl+F: fzf file picker (only if fzf is installed)
 command -v fzf &>/dev/null && bindkey '^F' fzf-file-widget
 
@@ -731,3 +731,10 @@ export PATH=/home/taufiq/.opencode/bin:$PATH
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+
+# Added by codebase-memory-mcp install
+export PATH="/home/taufiq/.local/bin:$PATH"
+
+
