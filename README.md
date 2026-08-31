@@ -38,6 +38,7 @@ Full ZSH configuration covering:
 | **WSL2** | `pbcopy pbpaste exp cdwin`, Windows PATH integration |
 | **Python** | `py pip venv activate` |
 | **NVM** | Lazy-loaded (faster shell startup) |
+| **CodeGraph** | `cgc cgx cgs cgq cgsync cginit-all` |
 | **Productivity** | `mkcd bak extract serve timer ducks myip ports reload` |
 
 ### `bootstrap.sh`
@@ -62,6 +63,7 @@ Installs every tool referenced in `zshrc`. Idempotent — safe to re-run.
 - `aws-cli` + `gcloud` CLI
 - `ansible`
 - `nvm` + Node LTS
+- `codegraph` (code intelligence CLI)
 - `oh-my-zsh` + plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`)
 - `powerlevel10k`
 

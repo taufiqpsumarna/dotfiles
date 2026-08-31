@@ -602,6 +602,17 @@ if command -v rtk &>/dev/null; then
 fi
 
 # ==============================================================================
+# CodeGraph — code intelligence CLI
+# Docs: https://github.com/1jehuang/codegraph
+# ==============================================================================
+alias cgc="codegraph context"
+alias cgx="codegraph explore"
+alias cgs="codegraph status"
+alias cgq="codegraph query"
+alias cgsync="codegraph sync"
+alias cginit-all="bash ~/workspace/projects/codegraph-init-all.sh"
+
+# ==============================================================================
 # Caveman — token-efficient AI communication (full mode by default)
 # Docs: https://github.com/JuliusBrussee/caveman
 # Installed via: curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
