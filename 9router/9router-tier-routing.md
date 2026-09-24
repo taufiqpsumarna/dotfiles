@@ -7,7 +7,7 @@
 ```mermaid
 flowchart TB
   DR["devsecops-router\n(also paid-tier — identical)"]
-  T1["tier1-subscription\nCC: claude-sonnet-5, claude-opus-5,\nclauде-fable-5-1, claude-fable-5\nAG: claude-sonnet-4-6,\nclaude-opus-4-6-thinking"]
+  T1["tier1-subscription\nCC: claude-sonnet-5, claude-opus-5,\nclaude-fable-5-1, claude-fable-5\nCU: claude-4.6-sonnet-medium-thinking,\nclaude-4.5-sonnet, gpt-5.3-codex\nAG: claude-sonnet-4-6,\nclaude-opus-4-6-thinking"]
   T2["tier2-cheap\nAG: gemini-3.8-flash-high,\ngemini-3.8-flash, gemini-3.7-flash-high,\ngemini-3.6-flash-high, gpt-oss-120b-medium,\ngemini-3.7-flash-low"]
   T3["tier3-free\nOC: deepseek-v4-flash-free,\nnemotron-3-ultra-free,\nling-3.0-flash-free, big-pickle\nMMF: mimo-auto"]
 
@@ -27,6 +27,9 @@ Maximize value of existing subscriptions. Try first, always.
 | `cc/claude-opus-5` | Claude Code (cc) | 1M | Yes |
 | `cc/claude-fable-5-1` | Claude Code (cc) | 1M | Yes |
 | `cc/claude-fable-5` | Claude Code (cc) | 1M | Yes |
+| `cu/claude-4.6-sonnet-medium-thinking` | Cursor (cu) | 200K | Yes |
+| `cu/claude-4.5-sonnet` | Cursor (cu) | 200K | Yes |
+| `cu/gpt-5.3-codex` | Cursor (cu) | 200K | Yes |
 | `ag/claude-sonnet-4-6` | Antigravity (ag) | 1M | Yes |
 | `ag/claude-opus-4-6-thinking` | Antigravity (ag) | 200K | Yes |
 
@@ -64,9 +67,9 @@ Zero-cost fallback. Ensures continuous AI access when paid providers are unavail
 
 | Combo ID | Purpose | Models |
 |---|---|---|
-| `devsecops-router` | Primary entry point for DevSecOps tasks | CC → AG-premium → tier2-cheap → tier3-free |
+| `devsecops-router` | Primary entry point for DevSecOps tasks | CC → Cursor → AG-premium → tier2-cheap → tier3-free |
 | `paid-tier` | Backward-compatible alias — identical to `devsecops-router` | Same |
-| `tier1-subscription` | Subscription-only requests | CC → AG-premium only |
+| `tier1-subscription` | Subscription-only requests | CC → Cursor → AG-premium only |
 | `tier2-cheap` | Cheap tier only | AG Gemini Flash + GPT-OSS |
 | `tier3-free` | Free tier only | OpenCode + Mimo free models |
 | `free-tier` | Legacy free combo (pre-existing) | OpenCode + Mimo free models |
