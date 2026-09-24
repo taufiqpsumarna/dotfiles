@@ -76,24 +76,47 @@ if ! $DRY_RUN; then
 fi
 
 # ------------------------------------------------------------------------------
-# Homebrew for Linux
+# Homebrew for Linux (system path if root/sudo available, else $HOME/.linuxbrew)
 # ------------------------------------------------------------------------------
 BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
+BREW_HOME_BIN="$HOME/.linuxbrew/bin/brew"
 if installed brew || [[ -x "$BREW_BIN" ]]; then
   warn "Homebrew already installed"
+  [[ -x "$BREW_BIN" ]] && BREW_HOME_BIN="$BREW_BIN"
+elif [[ -x "$BREW_HOME_BIN" ]]; then
+  warn "Homebrew already installed (\$HOME/.linuxbrew)"
 else
   info "Installing Homebrew..."
-  run "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-  success "Homebrew installed"
+  if sudo -n true 2>/dev/null; then
+    run "NONINTERACTIVE=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    success "Homebrew installed"
+  else
+    warn "No passwordless sudo; installing Homebrew to \$HOME/.linuxbrew instead"
+    run "git clone https://github.com/Homebrew/brew '$HOME/.linuxbrew/Homebrew'"
+    run "mkdir -p '$HOME/.linuxbrew/bin' && ln -sf '$HOME/.linuxbrew/Homebrew/bin/brew' '$BREW_HOME_BIN'"
+    success "Homebrew installed (\$HOME/.linuxbrew)"
+  fi
 fi
 
-if [[ -x "$BREW_BIN" ]]; then
-  eval "$($BREW_BIN shellenv)"
+[[ -x "$BREW_BIN" ]] && BREW_HOME_BIN="$BREW_BIN"
+if [[ -x "$BREW_HOME_BIN" ]]; then
+  eval "$($BREW_HOME_BIN shellenv)"
   for shell_rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if ! grep -Fq 'linuxbrew/.linuxbrew/bin/brew shellenv' "$shell_rc" 2>/dev/null; then
-      printf '%s\n' 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$shell_rc"
+    if ! grep -Fq '.linuxbrew/bin/brew shellenv' "$shell_rc" 2>/dev/null; then
+      printf '\neval "$(%s shellenv)"\n' "$BREW_HOME_BIN" >> "$shell_rc"
     fi
   done
+fi
+
+# ------------------------------------------------------------------------------
+# sofka (nklmilojevic/sofka tap)
+# ------------------------------------------------------------------------------
+if installed sofka; then
+  warn "sofka already installed"
+else
+  info "Installing sofka..."
+  run "brew install nklmilojevic/sofka/sofka"
+  success "sofka installed"
 fi
 
 # ------------------------------------------------------------------------------
