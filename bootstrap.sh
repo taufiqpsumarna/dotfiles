@@ -119,6 +119,14 @@ else
   success "sofka installed"
 fi
 
+# sofka plugins: trivy, popeye, oha (http benchmark), resource-summary
+if installed sofka; then
+  run "sofka plugin install trivy popeye oha resource-summary"
+  installed popeye || run "brew install popeye"
+  installed oha || run "brew install oha"
+  success "sofka plugins installed (trivy, popeye, oha, resource-summary)"
+fi
+
 # ------------------------------------------------------------------------------
 # uv (Python package and project manager)
 # ------------------------------------------------------------------------------
