@@ -6,8 +6,7 @@ Prioritizes:
 - Tier 1: Subscription providers (CC first, then AG premium) to maximize ROI.
 - Tier 2: Cheap providers (AG Gemini Flash, GPT-OSS) when subscriptions exhausted.
 - Tier 3: Free providers (OpenCode Free, Mimo Free) — round-robin for load balance.
-- devsecops-router: Full cascade Tier 1 -> Tier 2 -> Tier 3.
-- paid-tier: Maintained identical to devsecops-router for backward compatibility.
+- paid-tier: Full cascade Tier 1 -> Tier 2 -> Tier 3.
 
 Also configures:
 - Vision Adapter: round-robin across CC + AG vision-capable models.
@@ -61,22 +60,6 @@ TARGET_COMBOS = {
             "oc/mimo-v2.5-free",
         ],
         "kind": "roundrobin",
-    },
-    "devsecops-router": {
-        "models": [
-            "cc/claude-sonnet-5",
-            "cc/claude-opus-5",
-            "cc/claude-fable-5-1",
-            "cc/claude-fable-5",
-            "cu/claude-4.6-sonnet-medium-thinking",
-            "cu/claude-4.5-sonnet",
-            "cu/gpt-5.3-codex",
-            "ag/claude-sonnet-4-6",
-            "ag/claude-opus-4-6-thinking",
-            "tier2-cheap",
-            "tier3-free",
-        ],
-        "kind": None,
     },
     "paid-tier": {
         "models": [

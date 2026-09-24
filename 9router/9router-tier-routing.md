@@ -6,12 +6,12 @@
 
 ```mermaid
 flowchart TB
-  DR["devsecops-router\n(also paid-tier — identical)"]
+  PT["paid-tier"]
   T1["tier1-subscription\nCC: claude-sonnet-5, claude-opus-5,\nclaude-fable-5-1, claude-fable-5\nCU: claude-4.6-sonnet-medium-thinking,\nclaude-4.5-sonnet, gpt-5.3-codex\nAG: claude-sonnet-4-6,\nclaude-opus-4-6-thinking"]
   T2["tier2-cheap\nAG: gemini-3.8-flash-high,\ngemini-3.8-flash, gemini-3.7-flash-high,\ngemini-3.6-flash-high, gpt-oss-120b-medium,\ngemini-3.7-flash-low"]
   T3["tier3-free\nOC: deepseek-v4-flash-free,\nnemotron-3-ultra-free,\nling-3.0-flash-free, big-pickle\nMMF: mimo-auto"]
 
-  DR --> T1 --> T2 --> T3
+  PT --> T1 --> T2 --> T3
 ```
 
 9Router selects the first model in the chain that can serve the request. When a model is unavailable (quota exhausted, token expired, error 401/429/500) it falls back to the next model in order.
@@ -67,14 +67,13 @@ Zero-cost fallback. Ensures continuous AI access when paid providers are unavail
 
 | Combo ID | Purpose | Models |
 |---|---|---|
-| `devsecops-router` | Primary entry point for DevSecOps tasks | CC → Cursor → AG-premium → tier2-cheap → tier3-free |
-| `paid-tier` | Backward-compatible alias — identical to `devsecops-router` | Same |
+| `paid-tier` | Primary entry point for cascading requests | CC → Cursor → AG-premium → tier2-cheap → tier3-free |
 | `tier1-subscription` | Subscription-only requests | CC → Cursor → AG-premium only |
 | `tier2-cheap` | Cheap tier only | AG Gemini Flash + GPT-OSS |
 | `tier3-free` | Free tier only | OpenCode + Mimo free models |
 | `free-tier` | Legacy free combo (pre-existing) | OpenCode + Mimo free models |
 
-`paid-tier` is kept byte-identical to `devsecops-router` so any existing tools or scripts using `model: paid-tier` continue to benefit from the full cascade routing.
+`paid-tier` cascades through Tier 1 -> Tier 2 -> Tier 3 to ensure maximum ROI and uptime.
 
 ## Usage
 
@@ -84,7 +83,7 @@ Point your AI tool at the 9Router gateway:
 
 ```
 OPENAI_API_BASE=http://localhost:20128/v1
-MODEL=devsecops-router
+MODEL=paid-tier
 ```
 
 Or via direct curl:
@@ -93,7 +92,7 @@ Or via direct curl:
 curl http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "devsecops-router",
+    "model": "paid-tier",
     "messages": [{"role": "user", "content": "Review this Dockerfile for security issues."}]
   }'
 ```
@@ -102,10 +101,10 @@ curl http://localhost:20128/v1/chat/completions \
 
 | Task | Recommended model |
 |---|---|
-| SAST finding triage and remediation | `devsecops-router` (will pick Tier 1) |
+| SAST finding triage and remediation | `paid-tier` (will pick Tier 1) |
 | Vulnerability root cause analysis | `tier1-subscription` |
-| Helm chart / Kubernetes manifest authoring | `devsecops-router` |
-| Dockerfile security review | `devsecops-router` |
+| Helm chart / Kubernetes manifest authoring | `paid-tier` |
+| Dockerfile security review | `paid-tier` |
 | Pipeline YAML fix (quick) | `tier2-cheap` |
 | Dependency scan result summarization | `tier2-cheap` |
 | Code formatting / linting auto-fix | `tier2-cheap` |
