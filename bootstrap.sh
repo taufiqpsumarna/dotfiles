@@ -234,6 +234,17 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# kubescape (Kubernetes security scanner)
+# ------------------------------------------------------------------------------
+if installed kubescape; then
+  warn "kubescape already installed ($(kubescape version 2>/dev/null | head -1))"
+else
+  info "Installing kubescape..."
+  run "curl -sfL https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | sh -s -- -b $LOCAL_BIN"
+  success "kubescape installed"
+fi
+
+# ------------------------------------------------------------------------------
 # hadolint (Dockerfile linter)
 # ------------------------------------------------------------------------------
 if installed hadolint; then
