@@ -284,6 +284,17 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# radar (Kubernetes visibility, installs kubectl-radar)
+# ------------------------------------------------------------------------------
+if installed kubectl-radar; then
+  warn "radar already installed"
+else
+  info "Installing radar..."
+  run "curl -fsSL https://get.radarhq.io | INSTALL_DIR=$LOCAL_BIN sh"
+  success "radar installed"
+fi
+
+# ------------------------------------------------------------------------------
 # eza (modern ls replacement)
 # ------------------------------------------------------------------------------
 if installed eza; then
