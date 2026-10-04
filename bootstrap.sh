@@ -381,6 +381,17 @@ set -u
 success "nvm available with $(node -v) and $(npm -v)"
 
 # ------------------------------------------------------------------------------
+# codegraph
+# ------------------------------------------------------------------------------
+if installed codegraph; then
+  warn "codegraph already installed"
+else
+  info "Installing codegraph..."
+  run "npm install -g codegraph"
+  success "codegraph installed"
+fi
+
+# ------------------------------------------------------------------------------
 # Oh My Zsh
 # ------------------------------------------------------------------------------
 if [[ -d "$HOME/.oh-my-zsh" ]]; then
