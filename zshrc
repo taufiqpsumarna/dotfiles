@@ -741,3 +741,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="/home/taufiq/.local/bin:$PATH"
 
 
+
+# WSL DNS times out on TXT _grpc_config.* lookups, stalling grpc-go dials (Radar Hubble)
+export GRPC_ENABLE_TXT_SERVICE_CONFIG=false
