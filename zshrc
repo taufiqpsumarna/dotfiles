@@ -684,8 +684,11 @@ if command -v aws_completer &>/dev/null; then
 fi
 
 # Google Cloud SDK
-[[ -f "$HOME/.local/share/google-cloud-sdk/completion.zsh.inc" ]] && \
-  source "$HOME/.local/share/google-cloud-sdk/completion.zsh.inc"
+# Native Linux SDK; Windows one under /mnt/c is ~30s/call in WSL
+if [[ -d "$HOME/google-cloud-sdk" ]]; then
+  source "$HOME/google-cloud-sdk/path.zsh.inc"
+  source "$HOME/google-cloud-sdk/completion.zsh.inc"
+fi
 
 # direnv hook (install: sudo apt install direnv)
 if command -v direnv &>/dev/null; then

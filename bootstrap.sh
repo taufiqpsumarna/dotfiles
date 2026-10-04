@@ -122,7 +122,8 @@ fi
 # ------------------------------------------------------------------------------
 # gcloud
 # ------------------------------------------------------------------------------
-if installed gcloud; then
+# WSL: Windows gcloud under /mnt/c is ~30s/call, don't count it as installed
+if installed gcloud && [[ "$(command -v gcloud)" != /mnt/* ]]; then
   warn "gcloud already installed ($(gcloud version 2>/dev/null | head -1))"
 else
   info "Installing gcloud..."
@@ -234,6 +235,17 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# kubescape (Kubernetes security scanner)
+# ------------------------------------------------------------------------------
+if installed kubescape; then
+  warn "kubescape already installed ($(kubescape version 2>/dev/null | head -1))"
+else
+  info "Installing kubescape..."
+  run "curl -sfL https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | sh -s -- -b $LOCAL_BIN"
+  success "kubescape installed"
+fi
+
+# ------------------------------------------------------------------------------
 # hadolint (Dockerfile linter)
 # ------------------------------------------------------------------------------
 if installed hadolint; then
@@ -269,6 +281,17 @@ else
   run "curl -fsSL 'https://github.com/zegl/kube-score/releases/download/${KS_VER}/kube-score_${KS_VER_NUM}_linux_amd64.tar.gz' | tar -xz -C $LOCAL_BIN kube-score"
   run "chmod +x $LOCAL_BIN/kube-score"
   success "kube-score ${KS_VER} installed"
+fi
+
+# ------------------------------------------------------------------------------
+# radar (Kubernetes visibility, installs kubectl-radar)
+# ------------------------------------------------------------------------------
+if installed kubectl-radar; then
+  warn "radar already installed"
+else
+  info "Installing radar..."
+  run "curl -fsSL https://get.radarhq.io | INSTALL_DIR=$LOCAL_BIN sh"
+  success "radar installed"
 fi
 
 # ------------------------------------------------------------------------------
