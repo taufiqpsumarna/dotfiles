@@ -122,7 +122,8 @@ fi
 # ------------------------------------------------------------------------------
 # gcloud
 # ------------------------------------------------------------------------------
-if installed gcloud; then
+# WSL: Windows gcloud under /mnt/c is ~30s/call, don't count it as installed
+if installed gcloud && [[ "$(command -v gcloud)" != /mnt/* ]]; then
   warn "gcloud already installed ($(gcloud version 2>/dev/null | head -1))"
 else
   info "Installing gcloud..."
