@@ -752,3 +752,5 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="/home/taufiq/.local/bin:$PATH"
 
 
+
+eval "$(/home/taufiq/.linuxbrew/bin/brew shellenv)"
