@@ -753,4 +753,5 @@ export PATH="/home/taufiq/.local/bin:$PATH"
 
 
 
-eval "$(/home/taufiq/.linuxbrew/bin/brew shellenv)"
+# WSL DNS times out on TXT _grpc_config.* lookups, stalling grpc-go dials (Radar Hubble)
+export GRPC_ENABLE_TXT_SERVICE_CONFIG=false
