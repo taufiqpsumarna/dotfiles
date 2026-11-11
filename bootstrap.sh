@@ -538,6 +538,8 @@ npx skills add https://github.com/openai/skills --skill security-best-practices 
 npx skills add google/skills -g
 npx skills add https://github.com/jeffallan/claude-skills --skill devops-engineer -g
 npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architect -g
+npx skills add https://github.com/cloudflare/skills --skill cloudflare -g
+npx skills add https://github.com/usestrix/strix --skill owasp-top-10-testing -g
 
 
 # ------------------------------------------------------------------------------
