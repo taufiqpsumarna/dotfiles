@@ -85,6 +85,17 @@ plugins=(
   zsh-syntax-highlighting     # must be last
 )
 
+# Docker Desktop's WSL integration symlinks vendor-completions/_docker into
+# /mnt/wsl/docker-desktop, which dangles while Desktop is stopped and makes
+# compinit fail. Shadow it with OMZ's bundled completion when the link is broken.
+_vendor_docker=/usr/share/zsh/vendor-completions/_docker
+if [[ -L $_vendor_docker && ! -e $_vendor_docker ]]; then
+  _vendor_idx=${fpath[(i)${_vendor_docker:h}]}
+  fpath[_vendor_idx,_vendor_idx-1]=("$ZSH/plugins/docker/completions")
+  unset _vendor_idx
+fi
+unset _vendor_docker
+
 source $ZSH/oh-my-zsh.sh
 
 # ==============================================================================
