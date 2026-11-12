@@ -541,6 +541,7 @@ npx skills add https://github.com/jeffallan/claude-skills --skill cloud-architec
 npx skills add https://github.com/cloudflare/skills --skill cloudflare -g
 npx skills add https://github.com/usestrix/strix --skill owasp-top-10-testing -g
 npx skills add https://github.com/cloudflare/security-audit-skill --skill security-audit -g
+npx skills add https://github.com/github/awesome-copilot --skill documentation-writer -g
 
 
 # ------------------------------------------------------------------------------
