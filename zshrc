@@ -96,6 +96,12 @@ if [[ -L $_vendor_docker && ! -e $_vendor_docker ]]; then
 fi
 unset _vendor_docker
 
+# The OMZ docker plugin runs `docker --version` on every startup to pick a
+# completion source. When Docker Desktop's WSL cli-tools mount is stale that
+# exec fails with EIO and the error breaks p10k instant prompt. Use the
+# plugin's bundled completion so startup never executes docker.
+zstyle ':omz:plugins:docker' legacy-completion yes
+
 source $ZSH/oh-my-zsh.sh
 
 # ==============================================================================
