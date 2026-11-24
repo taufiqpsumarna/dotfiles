@@ -641,6 +641,15 @@ export CAVEMAN_MODE="full"   # default intensity for all AI agent sessions
 # Make directory and cd into it
 mkcd() { mkdir -p "$@" && cd "$_"; }
 
+# yazi: cd into the last directory on exit
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd < "$tmp"
+  [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+  rm -f -- "$tmp"
+}
+
 # Create a dated backup of a file
 bak() { cp "$1" "${1}.bak.$(date +%Y%m%d_%H%M%S)"; echo "Backed up to ${1}.bak.$(date +%Y%m%d_%H%M%S)"; }
 

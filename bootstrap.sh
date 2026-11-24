@@ -128,6 +128,17 @@ if installed sofka; then
 fi
 
 # ------------------------------------------------------------------------------
+# yazi (terminal file manager)
+# ------------------------------------------------------------------------------
+if installed yazi; then
+  warn "yazi already installed ($(yazi --version 2>/dev/null))"
+else
+  info "Installing yazi..."
+  run "brew install yazi"
+  success "yazi installed"
+fi
+
+# ------------------------------------------------------------------------------
 # uv (Python package and project manager)
 # ------------------------------------------------------------------------------
 if installed uv; then

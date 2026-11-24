@@ -39,7 +39,7 @@ Full ZSH configuration covering:
 | **Python** | `py pip venv activate` |
 | **NVM** | Lazy-loaded (faster shell startup) |
 | **CodeGraph** | `cgc cgx cgs cgq cgsync cginit-all` |
-| **Productivity** | `mkcd bak extract serve timer ducks myip ports reload` |
+| **Productivity** | `mkcd bak extract serve timer ducks myip ports reload y` |
 
 ### `bootstrap.sh`
 Installs every tool referenced in `zshrc`. Idempotent — safe to re-run.
@@ -49,6 +49,7 @@ Installs every tool referenced in `zshrc`. Idempotent — safe to re-run.
 - Homebrew for Linux
 - `fzf` (fuzzy finder)
 - `eza` (modern `ls` with icons and git status)
+- `yazi` (terminal file manager)
 - `kubectl` + `kubectx` + `kubens`
 - `helm`
 - `k9s` (Kubernetes TUI)
